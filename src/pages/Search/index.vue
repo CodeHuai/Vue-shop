@@ -1,18 +1,13 @@
 <template>
   <div>
-    Search
-    params参数: {{$route.params.keyword}} <br>
-    query参数： {{$route.query.keyword1}}
-
+    <TypeNav></TypeNav>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'Search',
-}
+  name: "Search",
+};
 </script>
 
-<style lang="less" scoped>
-
-</style>
+<style lang="less" scoped></style>

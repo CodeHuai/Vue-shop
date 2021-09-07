@@ -2,7 +2,62 @@
   <!-- 商品分类导航 -->
   <div class="type-nav">
     <div class="container">
-      <h2 class="all">全部商品分类</h2>
+      <div @mouseleave="moveOutDiv" @mouseenter="isShow = true">
+        <h2 class="all">全部商品分类</h2>
+        <transition name="sort">
+          <div class="sort" v-show="isShow">
+            <div class="all-sort-list2" @click="toSearch">
+              <div
+                class="item"
+                :class="{ item_on: currentIndex === index }"
+                v-for="(c1, index) in categoryList"
+                :key="c1.categoryId"
+                @mouseenter="moveInItem(index)"
+              >
+                <h3>
+                  <a
+                    href="javascript:;"
+                    :data-category1Id="c1.categoryId"
+                    :data-categoryName="c1.categoryName"
+                    >{{ c1.categoryName }}</a
+                  >
+                </h3>
+                <div class="item-list clearfix">
+                  <div class="subitem">
+                    <dl
+                      class="fore"
+                      v-for="(c2, index) in c1.categoryChild"
+                      :key="c2.categoryId"
+                    >
+                      <dt>
+                        <a
+                          href="javascript:;"
+                          :data-category2Id="c2.categoryId"
+                          :data-categoryName="c2.categoryName"
+                          >{{ c2.categoryName }}</a
+                        >
+                      </dt>
+                      <dd>
+                        <em
+                          v-for="(c3, index) in c2.categoryChild"
+                          :key="c3.categoryId"
+                        >
+                          <a
+                            href="javascript:;"
+                            :data-category3Id="c3.categoryId"
+                            :data-categoryName="c3.categoryName"
+                            >{{ c3.categoryName }}</a
+                          >
+                        </em>
+                      </dd>
+                    </dl>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </transition>
+      </div>
       <nav class="nav">
         <a href="###">服装城</a>
         <a href="###">美妆馆</a>
@@ -13,44 +68,74 @@
         <a href="###">有趣</a>
         <a href="###">秒杀</a>
       </nav>
-      <div class="sort">
-        <div class="all-sort-list2">
-          <div class="item" v-for="(c1,index) in categoryList" :key="c1.categoryId">
-            <h3>
-              <a href="">{{c1.categoryName}}</a>
-            </h3>
-            <div class="item-list clearfix">
-              <div class="subitem">
-                <dl class="fore" v-for="(c2,index) in c1.categoryChild" :key="c2.categoryId">
-                  <dt>
-                    <a href="">{{c2.categoryName}}</a>
-                  </dt>
-                  <dd>
-                    <em v-for="(c3,index) in c2.categoryChild" :key="c3.categoryId">
-                      <a href="">{{c3.categoryName}}</a>
-                    </em>
-                  </dd>
-                </dl>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 </template>
 
 <script>
 import { mapState } from "vuex";
+import throttle from "lodash/throttle";
 export default {
   name: "TypeNav",
+  data() {
+    return {
+      currentIndex: -1,
+      isShow: true,
+    };
+  },
   mounted() {
-    // 触发三连环获取数据存储到vuex的state,此时vue的组件当中还没有数据
-    this.getCategoryList();
+    if (this.$route.path !== "/home") {
+      this.isShow = false;
+    }
   },
   methods: {
-    getCategoryList() {
-      this.$store.dispatch("getCategoryList");
+    moveInItem: throttle(
+      function (index) {
+        this.currentIndex = index;
+      },
+      50,
+      { trailing: false }
+    ),
+
+    // 点击三级分类
+    toSearch(event) {
+      let target = event.target;
+      let dataset = target.dataset;
+      let { category1id, category2id, category3id, categoryname } = dataset;
+      if (categoryname) {
+        // categoryname有就代表点的就是a标签
+        let location = {
+          name: "search",
+        };
+        let query = {
+          categoryName: categoryname,
+        };
+        if (category1id) {
+          //点的一级
+          query.category1Id = category1id;
+        } else if (category2id) {
+          //点的二级
+          query.category2Id = category2id;
+        } else {
+          //点的三级
+          query.category3Id = category3id;
+        }
+        location.query = query;
+
+        //点击三级分类跳转之前，先看看之前有没有带params参数，如果有，把之前的params参数也给鞋带上
+        // if(this.$route.params){
+        location.params = this.$route.params;
+        // }
+
+        this.$router.push(location);
+      }
+    },
+    // 移出div home隐藏23级分类  search全部隐藏
+    moveOutDiv() {
+      this.currentIndex = -1;
+      if (this.$route.path !== "/home") {
+        this.isShow = false;
+      }
     },
   },
 
@@ -60,10 +145,6 @@ export default {
     ...mapState({
       categoryList: (state) => state.home.categoryList,
     }),
-
-    // categoryList(){
-    //   return this.$store.state.home.categoryList
-    // }
   },
 };
 </script>
@@ -106,8 +187,21 @@ export default {
       width: 210px;
       height: 461px;
       position: absolute;
-      background: #fafafa;
+      background: hotpink;
       z-index: 999;
+
+      &.sort-enter {
+        height: 0;
+        opacity: 0;
+      }
+      &.sort-enter-to {
+        height: 461px;
+        opacity: 1;
+      }
+
+      &.sort-enter-active {
+        transition: all 0.5s;
+      }
 
       .all-sort-list2 {
         .item {
@@ -161,7 +255,7 @@ export default {
 
                 dd {
                   float: left;
-                  width: 415px;
+                  width: 555px;
                   padding: 3px 0 0;
                   overflow: hidden;
 
@@ -178,7 +272,8 @@ export default {
             }
           }
 
-          &:hover {
+          &.item_on {
+            background-color: greenyellow;
             .item-list {
               display: block;
             }

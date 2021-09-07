@@ -1,3 +1,4 @@
+//发请求其实最终就是书写vuex三连环
 import { reqCategoryList } from "@/api";
 
 const state = {
@@ -9,7 +10,7 @@ const mutations = {
   },
 };
 const actions = {
-  // 获取三级分类导航的数据
+  //发请求拿数据提交给mutation
   async getCategoryList({ commit }) {
     const result = await reqCategoryList();
     if (result.code === 200) {

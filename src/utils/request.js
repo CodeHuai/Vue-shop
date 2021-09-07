@@ -25,12 +25,6 @@ service.interceptors.response.use(
   },
   (error) => {
     Nprogress.done();
-    // 统一处理请求错误, 具体请求也可以选择处理或不处理
-    alert("axios请求失败" + error.message);
-    // 后期你还要不要处理，自己选择
-    // 如果后期还想要处理，那么需要把这个错误信息继续往下传
-    // return Promise.reject(error)  //Promise.reject(new Error('自定义错误信息'))
-    // 如果后期不想处理这个错误信息了，那么需要中断promise链
     return new Promise(() => {});
   }
 );

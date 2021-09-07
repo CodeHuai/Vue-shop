@@ -3,8 +3,6 @@
     <Header></Header>
 
     <router-view></router-view>
-    <!-- 这样根据当前匹配的路由对象的路径去判断显示或者隐藏是可以的，但是不好 -->
-    <!-- <Footer v-show="$route.path !== '/login' && $route.path !== '/register'"></Footer> -->
     <Footer v-show="!$route.meta.isHidden"></Footer>
   </div>
 </template>
@@ -18,6 +16,14 @@ export default {
   components: {
     Header,
     Footer,
+  },
+  mounted() {
+    this.getCategoryList();
+  },
+  methods: {
+    getCategoryList() {
+      this.$store.dispatch("getCategoryList");
+    },
   },
 };
 </script>
