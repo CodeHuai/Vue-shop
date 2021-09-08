@@ -3,6 +3,8 @@ import App from "@/App.vue";
 import router from "@/router";
 import store from "@/store";
 
+import "@/mock/mockServer";
+import "swiper/css/swiper.min.css";
 import TypeNav from "@/components/TypeNav";
 Vue.component("TypeNav", TypeNav);
 

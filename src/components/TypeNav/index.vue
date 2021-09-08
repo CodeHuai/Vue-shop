@@ -4,6 +4,7 @@
     <div class="container">
       <div @mouseleave="moveOutDiv" @mouseenter="isShow = true">
         <h2 class="all">全部商品分类</h2>
+        <!-- 这里的 name 是对于vue中动画操作 自己命名的设置 -->
         <transition name="sort">
           <div class="sort" v-show="isShow">
             <div class="all-sort-list2" @click="toSearch">
@@ -79,7 +80,9 @@ export default {
   name: "TypeNav",
   data() {
     return {
+      // 参考值思想
       currentIndex: -1,
+      // 是否显示
       isShow: true,
     };
   },
@@ -89,6 +92,7 @@ export default {
     }
   },
   methods: {
+    // 当鼠标移入时的操作
     moveInItem: throttle(
       function (index) {
         this.currentIndex = index;

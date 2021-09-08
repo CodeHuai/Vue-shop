@@ -1,16 +1,32 @@
 //这个文件是专门用来写接口请求函数的
 // 每个接口最终都对应了一个函数，我们只需要调用这个函数就能往这个接口发请求拿数据
-import Ajax from '@/utils/request'
+import Ajax from "@/utils/request";
+import mockAjax from "@/utils/mockRequest";
+
 // 请求获取三级分类的数据
 //http://39.98.123.211/  服务器地址
-///api/product/getBaseCategoryList  //请求路径 
+///api/product/getBaseCategoryList  //请求路径
 //get
-
 export const reqCategoryList = () => {
   return Ajax({
-    url:'/product/getBaseCategoryList',
-    method:'get'
-  })//返回的是一个promise对象
-}
+    url: "/product/getBaseCategoryList",
+    method: "GET",
+  }); //返回的是一个promise对象
+};
 
-// reqCategoryList()
+// 获取首页轮播图
+export const reqBannerList = () => {
+  return mockAjax({
+    url: "/banner",
+    method: "GET",
+  });
+};
+
+//获取首页楼层数据 floor
+//get
+export const reqFloorList = () => {
+  return mockAjax({
+    url: "/floor",
+    method: "GET",
+  });
+};

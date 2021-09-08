@@ -4,25 +4,18 @@
     <div class="sortList clearfix">
       <div class="center">
         <!--banner轮播-->
-        <div class="swiper-container" id="mySwiper">
+        <div class="swiper-container" ref="bannerSwiper">
           <div class="swiper-wrapper">
-            <div class="swiper-slide">
-              <img src="./images/banner1.jpg" />
+            <div
+              class="swiper-slide"
+              v-for="(banner, index) in bannerList"
+              :key="banner.id"
+            >
+              <img :src="banner.imgUrl" />
             </div>
-            <!-- <div class="swiper-slide">
-                                <img src="./images/banner2.jpg" />
-                            </div>
-                            <div class="swiper-slide">
-                                <img src="./images/banner3.jpg" />
-                            </div>
-                            <div class="swiper-slide">
-                                <img src="./images/banner4.jpg" />
-                            </div> -->
           </div>
-          <!-- 如果需要分页器 -->
           <div class="swiper-pagination"></div>
 
-          <!-- 如果需要导航按钮 -->
           <div class="swiper-button-prev"></div>
           <div class="swiper-button-next"></div>
         </div>
@@ -101,8 +94,55 @@
 </template>
 
 <script>
+import { mapState } from "vuex";
+import Swiper from "swiper";
 export default {
   name: "ListContainer",
+  mounted() {
+    this.getBannerList();
+  },
+  methods: {
+    getBannerList() {
+      this.$store.dispatch("getBannerList");
+    },
+  },
+  computed: {
+    // mapstate中使用数组写法的前提： 1- 名臣相同 2- 不能使用模块化
+    ...mapState({
+      bannerList: (state) => state.home.bannerList,
+    }),
+  },
+  watch: {
+    bannerList: {
+      immediate: true, //这边添加这个值没有任何意义，仅仅是为了保持一致
+      handler() {
+        //监视的数据发生变化的时候，执行这个回调
+        //在这里代表数据是一定回来了
+        //等待最近的一次dom更新之后执行，内部传递的回调
+        this.$nextTick(() => {
+          new Swiper(this.$refs.bannerSwiper, {
+            // direction: "vertical", // 垂直切换选项
+            // loop: true, // 循环模式选项
+            // 如果需要分页器
+            pagination: {
+              el: ".swiper-pagination",
+            },
+
+            // 如果需要前进后退按钮
+            navigation: {
+              nextEl: ".swiper-button-next",
+              prevEl: ".swiper-button-prev",
+            },
+
+            // // 如果需要滚动条
+            // scrollbar: {
+            //   el: ".swiper-scrollbar",
+            // },
+          });
+        });
+      },
+    },
+  },
 };
 </script>
 
