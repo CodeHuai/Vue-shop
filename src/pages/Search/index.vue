@@ -10,24 +10,18 @@
               <a href="#">全部结果</a>
             </li>
           </ul>
-          <!-- 面包屑 -->
           <ul class="fl sui-tag">
-            <!-- 如果有 这里就生成一个面包  很灵活的一种方式，值得借鉴学习 -->
-            <!-- 存在categoryName时 -->
             <li class="with-x" v-if="searchParams.categoryName">
               {{ searchParams.categoryName
               }}<i @click="removeCategoryName">×</i>
             </li>
-            <!-- 存在搜索关键字时 -->
             <li class="with-x" v-if="searchParams.keyword">
               {{ searchParams.keyword }}<i @click="removeKeyword">×</i>
             </li>
-            <!-- 点击品牌时 -->
             <li class="with-x" v-if="searchParams.trademark">
               {{ searchParams.trademark.split(":")[1]
               }}<i @click="removeTrademark">×</i>
             </li>
-            <!-- props -->
             <li
               class="with-x"
               v-for="(prop, index) in searchParams.props"
@@ -49,23 +43,39 @@
           <div class="sui-navbar">
             <div class="navbar-inner filter">
               <ul class="sui-nav">
-                <li class="active">
-                  <a href="#">综合</a>
+                <!--
+                  1、背景色应该是动态的，根据排序标志动态设定class
+                  2、字体图标
+                    >1、使用哪个字体图标  iconfont
+                    >2、字体图标哪个有 条件和背景色一样，根据排序标志动态设定
+                    >3、如果有字体图标，是向上还是向下，根据排序类型决定
+                 -->
+                <!-- 这里的 1代表综合排序 2代表价格排序   -->
+                <li :class="{ active: orderFlag === '1' }">
+                  <a href="javascript:;" @click="changeOrder('1')">
+                    综合
+                    <i
+                      class="iconfont"
+                      :class="{
+                        icondown: orderType === 'desc',
+                        iconup: orderType === 'asc',
+                      }"
+                      v-if="orderFlag === '1'"
+                    ></i>
+                  </a>
                 </li>
-                <li>
-                  <a href="#">销量</a>
-                </li>
-                <li>
-                  <a href="#">新品</a>
-                </li>
-                <li>
-                  <a href="#">评价</a>
-                </li>
-                <li>
-                  <a href="#">价格⬆</a>
-                </li>
-                <li>
-                  <a href="#">价格⬇</a>
+                <li :class="{ active: orderFlag === '2' }">
+                  <a href="javascript:;" @click="changeOrder('2')">
+                    价格
+                    <i
+                      class="iconfont"
+                      :class="{
+                        icondown: orderType === 'desc',
+                        iconup: orderType === 'asc',
+                      }"
+                      v-if="orderFlag === '2'"
+                    ></i>
+                  </a>
                 </li>
               </ul>
             </div>
@@ -112,35 +122,15 @@
               </li>
             </ul>
           </div>
-          <div class="fr page">
-            <div class="sui-pagination clearfix">
-              <ul>
-                <li class="prev disabled">
-                  <a href="#">«上一页</a>
-                </li>
-                <li class="active">
-                  <a href="#">1</a>
-                </li>
-                <li>
-                  <a href="#">2</a>
-                </li>
-                <li>
-                  <a href="#">3</a>
-                </li>
-                <li>
-                  <a href="#">4</a>
-                </li>
-                <li>
-                  <a href="#">5</a>
-                </li>
-                <li class="dotted"><span>...</span></li>
-                <li class="next">
-                  <a href="#">下一页»</a>
-                </li>
-              </ul>
-              <div><span>共10页&nbsp;</span></div>
-            </div>
-          </div>
+          <!-- 连续数量一般都是奇数 -->
+          <Pagination
+            :currentPageNo="searchParams.pageNo"
+            :continueNo="5"
+            :total="goodsListInfo.total"
+            :pageSize="searchParams.pageSize"
+            @changePageNo="getGoodsListInfo"
+          >
+          </Pagination>
         </div>
       </div>
     </div>
@@ -148,7 +138,7 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import { mapGetters, mapState } from "vuex";
 import SearchSelector from "./SearchSelector/SearchSelector";
 export default {
   name: "Search",
@@ -166,51 +156,68 @@ export default {
         keyword: "",
         props: [],
         trademark: "",
-        //初始化默认的排序规则
-        order: "1:desc",
-        // 初始化默认的页码
-        pageNo: 1,
-        // 初始化默认的每页数量
-        pageSize: 5,
+
+        order: "2:asc", //初始化默认的排序规则
+        //1:desc  冒号前面代表排序标志，冒号后面代表排序类型
+        // 前面为1代表是综合排序  前面为2代表价格排序
+        // asc代表升序  desc代表降序
+
+        pageNo: 1, // 初始化默认的页码
+        pageSize: 10, // 初始化默认的每页数量
       },
     };
   },
   components: {
     SearchSelector,
   },
-  // 根据路由的变化来动态生成 面包屑  而且路由已经被监听，所以这里的一步不再需要
   // beforeMount() {
-  //   let { category1Id, category2Id, category3Id, categoryName } =
-  //     this.$route.params;
-  //   let { keyword } = this.$route.query;
-  //   // 注意这里，因为this.searchParams内部的值只是简单的key-value, 所以可以实现如果有相同的会覆盖，不同的会添加。
-  //   // 但是如果这里的内部的值是一个负责的对象，这种方式是无法实现上述的效果！！！！！！
+  //   // // 在这个里面我们需要把搜索的条件参数，给获取到，放到this.searchParams
+  //   // let { category1Id, category2Id, category3Id, categoryName } =
+  //   //   this.$route.query;
+  //   // let { keyword } = this.$route.params;
+  //   // // ...运算符是最简单的对象浅拷贝
+  //   // let searchParams = {
+  //   //   ...this.searchParams,
+  //   //   category1Id,
+  //   //   category2Id,
+  //   //   category3Id,
+  //   //   categoryName,
+  //   //   keyword,
+  //   // };
 
-  //   // 前台往后台发数据，如果是undefined是不会带上的，但是如果是空串，他会带上 所以一般要么undefined 要么删除这个字段
-  //   let searchParams = {
-  //     ...this.searchParams,
-  //     category1Id,
-  //     category2Id,
-  //     category3Id,
-  //     categoryName,
-  //     keyword,
-  //   };
+  //   // //
+  //   // //1、 功能：把一个对象的可枚举属性放在一个数组里面
+  //   // //2、 参数：这个对象
+  //   // //3、 返回值：可枚举属性组成的数组
+  //   // Object.keys(searchParams).forEach((item) => {
+  //   //   if (searchParams[item] === "") {
+  //   //     delete searchParams[item];
+  //   //   }
+  //   // });
+  //   // // 如果发请求传递的是undefined，那么这个参数是不会带过去的
+  //   // // 如果发请求传递的是空串，那么空串也是要带过去的，会增加我们的带宽，浪费资源
+  //   // // 以后如果我们发现请求里面是带的空串，要么删除这一项，要么改为undefined
+  //   // this.searchParams = searchParams;
 
-  //   Object.keys(searchParams).forEach((item) => {
-  //     if (searchParams[item] === "") {
-  //       delete searchParams[item];
-  //     }
-  //   });
-  //   this.searchParams = searchParams;
+  //   this.handlerSearchParams()
   // },
+
   // mounted() {
   //   this.getGoodsListInfo();
   // },
   methods: {
-    // 搜索请求方法
-    getGoodsListInfo() {
+    getGoodsListInfo(page = 1) {
+      // 我们一开始写的搜索参数是一个空的对象，这个空的对象是我们测试的时候不知道传递啥搜索参数
+      // 但是它可以让我们获取到一批默认的测试数据，我们可以展示页面
+      // 这里如果就写成是空的对象，代表我们跳转到search页面，搜索条件什么都没有。就是说没有按照任何条件搜索过
+      // this.$store.dispatch("getGoodsListInfo", {});
+      this.searchParams.pageNo = page;
       this.$store.dispatch("getGoodsListInfo", this.searchParams);
+      // 用户从首页跳转到search页面，默认就会按照三级分类名称和关键字进行搜索，这个请求其实就是要第一次搜索用的
+      // 我们想要让这个请求是按照三级分类名称和关键字进行搜索，那么必须在它发送之前，把用户传递的参数，给获取到
+      // 添加到this.searchParams
     },
+
     // 专门处理参数
     handlerSearchParams() {
       // 在这个里面我们需要把搜索的条件参数，给获取到，放到this.searchParams
@@ -218,6 +225,9 @@ export default {
         this.$route.query;
       let { keyword } = this.$route.params;
       // ...运算符是最简单的对象浅拷贝
+
+      // 注意这里  只有当内部的数据属于简单的类型，才会达到有则覆盖，无则添加的效果。  一旦内部是一个对象，
+      // 只会造成一个对象的合并，而不是去重或者添加 而是整体合并 ！！！！！
       let searchParams = {
         ...this.searchParams,
         category1Id,
@@ -227,7 +237,6 @@ export default {
         keyword,
       };
 
-      //
       //1、 功能：把一个对象的可枚举属性放在一个数组里面
       //2、 参数：这个对象
       //3、 返回值：可枚举属性组成的数组
@@ -237,42 +246,55 @@ export default {
         }
       });
       this.searchParams = searchParams;
+      // this.searchParams.pageNo = 1
     },
-    // 删除categoyrName   categoyrName, category1Id, category2Id, category3Id是query参数
-    removeCategoryName() {
-      // 单纯的dispatch是无法修改路径的
-      this.searchParams.categoryName = undefined;
-      this.$router.push({ name: "search", params: this.$route.params });
-    },
-    // 删除关键字  -- 关键字是params参数
-    removeKeyword() {
-      this.searchParams.keyword = undefined;
-      this.$router.push({
-        name: "search",
-        query: this.$route.query,
-      });
 
-      // 全局事件总线 发射
+    // 删除搜索条件三级分类名称
+    removeCategoryName() {
+      //把搜索条件当中的三级分类名称删除，重新发送请求
+      this.searchParams.categoryName = undefined;
+      // this.getGoodsListInfo()  不能这样发请求，因为这样发请求，请求是可以发的，但是路径是没法改变
+      // this.$route 代表我们匹配的当前的路由对象，只能读不能自己随意更改
+      // this.searchParams.pageNo = 1
+      this.$router.replace({ name: "search", params: this.$route.params });
+      // 我这里其实并没有法请求，只是在修改路径，修改了路径，那么路由对象就会发生改变，然后就会进入到watch里面自动
+      // 发请求
+    },
+    // 删除搜索条件关键字
+    removeKeyword() {
+      //把搜索条件当中的三级分类名称删除，重新发送请求
+      this.searchParams.keyword = undefined;
+      // this.getGoodsListInfo()  不能这样发请求，因为这样发请求，请求是可以发的，但是路径是没法改变
+      // this.$route 代表我们匹配的当前的路由对象，只能读不能自己随意更改
+      // this.searchParams.pageNo = 1
+      this.$router.replace({ name: "search", query: this.$route.query });
+      // 我这里其实并没有法请求，只是在修改路径，修改了路径，那么路由对象就会发生改变，然后就会进入到watch里面自动
+      // 发请求
+
+      // 找到bus，调用emit,发送数据
       this.$bus.$emit("clearKeyword");
     },
-    // 点击品牌时的回调
+
+    // 根据点击品牌搜索
     searchForTrademark(tm) {
-      // 后端需要 tm.id:tm.name形式
       this.searchParams.trademark = `${tm.tmId}:${tm.tmName}`;
       this.getGoodsListInfo();
     },
+
     // 删除面包屑的品牌重新搜索
     removeTrademark() {
       this.searchParams.trademark = undefined;
+      // this.searchParams.pageNo = 1
       this.getGoodsListInfo();
     },
-    // 点击商品属性
+    // 按照属性进行搜索
     searchForProps(attr, attrValue) {
       let prop = `${attr.attrId}:${attrValue}:${attr.attrName}`;
-      // 但是这里要注意 去重 避免重复点击相同的
+
       let isRepeate = this.searchParams.props.some((item) => item === prop);
       if (isRepeate) return;
       this.searchParams.props.push(prop);
+      // this.searchParams.pageNo = 1
       this.getGoodsListInfo();
     },
     // 删除面包屑的属性，重新搜索
@@ -280,10 +302,44 @@ export default {
       this.searchParams.props.splice(index, 1);
       this.getGoodsListInfo();
     },
+
+    // 点击综合和价格排序
+    changeOrder(orderFlag) {
+      //判断用户点击的标志是不是和原来的数据标志一样
+      //先获取到原来排序的标志
+      let originFlag = this.searchParams.order.split(":")[0]; //代表原来的排序标志
+      let originType = this.searchParams.order.split(":")[1]; //代表原来的排序类型
+      let newOrder = "";
+
+      if (orderFlag === originFlag) {
+        //代表用户点的和原来一样的标志，值需要修改标志的类型
+        newOrder = `${originFlag}:${originType === "asc" ? "desc" : "asc"}`;
+      } else {
+        newOrder = `${orderFlag}:desc`;
+      }
+      //修改数据重新发请求
+      this.searchParams.order = newOrder;
+      this.getGoodsListInfo();
+    },
+    // 点击分页器重新设置页码发请求
+    // changePageNo(page){
+    //   this.searchParams.pageNo = page
+    //   this.getGoodsListInfo()
+    // }
   },
   computed: {
     ...mapGetters(["goodsList"]),
+    ...mapState({
+      goodsListInfo: (state) => state.search.goodsListInfo,
+    }),
+    orderFlag() {
+      return this.searchParams.order.split(":")[0];
+    },
+    orderType() {
+      return this.searchParams.order.split(":")[1];
+    },
   },
+
   watch: {
     $route: {
       immediate: true,
