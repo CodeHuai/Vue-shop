@@ -65,6 +65,11 @@ export default {
       keyword: "",
     };
   },
+  mounted() {
+    this.$bus.$on("clearKeyword", () => {
+      this.keyword = "";
+    });
+  },
   methods: {
     toSearch() {
       // 三种

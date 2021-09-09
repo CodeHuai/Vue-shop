@@ -30,3 +30,26 @@ export const reqFloorList = () => {
     method: "GET",
   });
 };
+
+// 请求获取搜索页面数据
+// /api/list
+// post
+//参数例子  请求体参数
+// {
+//   "category3Id": "61",
+//   "categoryName": "手机",
+//   "keyword": "小米",
+//   "order": "1:desc",
+//   "pageNo": 1,
+//   "pageSize": 10,
+//   "props": ["1:1700-2799:价格", "2:6.65-6.74英寸:屏幕尺寸"],
+//   "trademark": "4:小米"
+// }
+// searchParams是一个对象,代表我们的请求体参数
+export const reqGoodsListInfo = (searchParams) => {
+  return Ajax({
+    url: "/list",
+    method: "post",
+    data: searchParams,
+  });
+};

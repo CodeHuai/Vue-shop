@@ -103,8 +103,13 @@ export default {
 
     // 点击三级分类
     toSearch(event) {
-      let target = event.target;
-      let dataset = target.dataset;
+      //1、事件在哪添
+      //2、如何判断点击的就是a
+      //3、如何获取参数
+      // event 代表事件对象   浏览器在调用原生事件回调函数的时候，会把这一次触发事件相关的所有信息，封装成一个对象
+      // 传递给回调函数的第一个形参
+      let target = event.target; //获取到点击的目标元素
+      let dataset = target.dataset; //获取到目标元素身上data-开头的属性和属性值组成的对象
       let { category1id, category2id, category3id, categoryname } = dataset;
       if (categoryname) {
         // categoryname有就代表点的就是a标签
