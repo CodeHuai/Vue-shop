@@ -89,9 +89,12 @@
               >
                 <div class="list-wrap">
                   <div class="p-img">
-                    <a href="item.html" target="_blank">
+                    <router-link :to="'/detail/' + goods.id">
                       <img :src="goods.defaultImg" />
-                    </a>
+                    </router-link>
+                    <!-- <a href="item.html" target="_blank">
+                      <img :src="goods.defaultImg" />
+                    </a> -->
                   </div>
                   <div class="price">
                     <strong>
@@ -100,9 +103,12 @@
                     </strong>
                   </div>
                   <div class="attr">
-                    <a target="_blank" href="item.html">
+                    <router-link :to="'/detail/' + goods.id">
                       {{ goods.title }}
-                    </a>
+                    </router-link>
+                    <!-- <a target="_blank" href="item.html">
+                      {{ goods.title }}
+                    </a> -->
                   </div>
                   <div class="commit">
                     <i class="command">已有<span>2000</span>人评价</i>

@@ -2,10 +2,7 @@ import Vue from "vue";
 import VueRouter from "vue-router";
 Vue.use(VueRouter);
 
-import Home from "@/pages/Home";
-import Search from "@/pages/Search";
-import Login from "@/pages/Login";
-import Register from "@/pages/Register";
+import routes from "./routes";
 
 //先把原来的push方法保存起来
 const originPush = VueRouter.prototype.push;
@@ -28,33 +25,9 @@ VueRouter.prototype.replace = function (location, resolved, rejected) {
 };
 
 export default new VueRouter({
-  routes: [
-    {
-      path: "/home",
-      component: Home,
-    },
-    {
-      path: "/search/:keyword?",
-      component: Search,
-      name: "search", //命名路由
-    },
-    {
-      path: "/login",
-      component: Login,
-      meta: {
-        isHidden: true,
-      },
-    },
-    {
-      path: "/register",
-      component: Register,
-      meta: {
-        isHidden: true,
-      },
-    },
-    {
-      path: "/",
-      redirect: "/home",
-    },
-  ],
+  mode: "history",
+  routes,
+  scrollBehavior(to, from, savedPosition) {
+    return { x: 0, y: 0 };
+  },
 });

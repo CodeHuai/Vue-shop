@@ -53,3 +53,23 @@ export const reqGoodsListInfo = (searchParams) => {
     data: searchParams,
   });
 };
+
+//请求获取详情页数据
+// /api/item/{ skuId }
+// get
+export const reqGoodsDetailInfo = (skuId) => {
+  return Ajax({
+    url: `/item/${skuId}`,
+    method: "get",
+  });
+};
+
+//添加购物车的请求
+// /api/cart/addToCart/{ skuId }/{ skuNum }
+// post
+export const reqAddOrUpdateShopCart = (skuId, skuNum) => {
+  return Ajax({
+    url: `/cart/addToCart/${skuId}/${skuNum}`,
+    method: "post",
+  });
+};
