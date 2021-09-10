@@ -49,7 +49,7 @@ export const reqFloorList = () => {
 export const reqGoodsListInfo = (searchParams) => {
   return Ajax({
     url: "/list",
-    method: "post",
+    method: "POST",
     data: searchParams,
   });
 };
@@ -60,7 +60,7 @@ export const reqGoodsListInfo = (searchParams) => {
 export const reqGoodsDetailInfo = (skuId) => {
   return Ajax({
     url: `/item/${skuId}`,
-    method: "get",
+    method: "GET",
   });
 };
 
@@ -70,6 +70,16 @@ export const reqGoodsDetailInfo = (skuId) => {
 export const reqAddOrUpdateShopCart = (skuId, skuNum) => {
   return Ajax({
     url: `/cart/addToCart/${skuId}/${skuNum}`,
-    method: "post",
+    method: "POST",
+  });
+};
+
+// 请求获取购物车列表
+// /api/cart/cartList
+// get
+export const reqShopCartList = () => {
+  return Ajax({
+    url: "/cart/cartList",
+    method: "GET",
   });
 };
