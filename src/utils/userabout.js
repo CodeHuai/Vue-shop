@@ -7,9 +7,9 @@ export function getUserTempId() {
   // 首先我们判断用户localStorage是不是已经有了身份标识，如果有了，那么直接拿自己有的
   // 如果没有，再给用户创建新的,然后再存储localStorage
   let userTempId = localStorage.getItem("userTempId_key");
-  if (!userTempId) {
+  if (userTempId === null) {
     //代表没有
-    userTempId = uuidv4();
+    userTempId = uuidv4(); // ⇨ '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d'
     localStorage.setItem("userTempId_key", userTempId);
   }
 

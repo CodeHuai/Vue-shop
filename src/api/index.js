@@ -83,3 +83,43 @@ export const reqShopCartList = () => {
     method: "GET",
   });
 };
+
+// 请求修改单个购物车的选中状态
+// /api/cart/checkCart/{skuId}/{isChecked}
+//  get
+export const reqUpdateOneIsCheck = (skuId, isChecked) => {
+  return Ajax({
+    url: `/cart/checkCart/${skuId}/${isChecked}`,
+    method: "GET",
+  });
+};
+
+// 请求修改多个购物车的选中状态
+// /api/cart/batchCheckCart/{isChecked}
+// post
+export const reqUpdateAllIsCheck = (isChecked, skuIdList) => {
+  return Ajax({
+    url: `/cart/batchCheckCart/${isChecked}`,
+    method: "POST",
+    data: skuIdList,
+  });
+};
+
+// 删除单个的 /api/cart/deleteCart/{skuId}
+// delete
+export const reqDeleteOneCart = (skuId) => {
+  return Ajax({
+    url: `/cart/deleteCart/${skuId}`,
+    method: "DELETE",
+  });
+};
+
+// /api/cart/batchDeleteCart
+// 删除所选的购物车  所有
+export const reqDeleteAllCart = (skuIdList) => {
+  return Ajax({
+    url: `/cart/batchDeleteCart`,
+    data: skuIdList,
+    method: "DELETE",
+  });
+};

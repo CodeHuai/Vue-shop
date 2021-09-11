@@ -21,6 +21,7 @@
               type="checkbox"
               name="chk_list"
               :checked="cartinfo.isChecked"
+              @click="updateOneIsCheck(cartinfo)"
             />
           </li>
           <li class="cart-list-con2">
@@ -32,21 +33,36 @@
             <span class="price">{{ cartinfo.cartPrice }}</span>
           </li>
           <li class="cart-list-con5">
-            <a href="javascript:void(0)" class="mins">-</a>
+            <a
+              href="javascript:void(0)"
+              class="mins"
+              @click="changeNum(-1, cartinfo)"
+              >-</a
+            >
             <input
               autocomplete="off"
               type="text"
               :value="cartinfo.skuNum"
               minnum="1"
               class="itxt"
+              @change="
+                changeNum($event.target.value * 1 - cartinfo.skuNum, cartinfo)
+              "
             />
-            <a href="javascript:void(0)" class="plus">+</a>
+            <a
+              href="javascript:void(0)"
+              class="plus"
+              @click="changeNum(1, cartinfo)"
+              >+</a
+            >
           </li>
           <li class="cart-list-con6">
             <span class="sum">{{ cartinfo.skuNum * cartinfo.cartPrice }}</span>
           </li>
           <li class="cart-list-con7">
-            <a href="#none" class="sindelet">删除</a>
+            <a href="javascript:;" class="sindelet" @click="deleteOne(cartinfo)"
+              >删除</a
+            >
             <br />
             <a href="#none">移到收藏</a>
           </li>
@@ -59,7 +75,7 @@
         <span>全选</span>
       </div>
       <div class="option">
-        <a href="#none">删除选中的商品</a>
+        <a href="javascript:;" @click="deleteAll">删除选中的商品</a>
         <a href="#none">移到我的关注</a>
         <a href="#none">清除下柜商品</a>
       </div>
@@ -92,6 +108,69 @@ export default {
     getShopCartList() {
       this.$store.dispatch("getShopCartList");
     },
+    // 加减修改购物车数量
+    async changeNum(disNum, cartInfo) {
+      // 如果最终值小于1 不符合  所以需要将最终值修正为1
+      if (disNum + cartInfo.skuNum < 1) {
+        disNum = 1 - cartInfo.skuNum;
+      }
+
+      try {
+        // addOrUpdateShopCart
+        await this.$store.dispatch("addOrUpdateShopCart", {
+          skuId: cartInfo.skuId,
+          skuNum: disNum,
+        });
+        this.getShopCartList();
+      } catch (error) {
+        console.log(error.message);
+      }
+    },
+    // 单个状态修改 skuId, isChecked
+    async updateOneIsCheck(cartInfo) {
+      try {
+        await this.$store.dispatch("updateOneIsCheck", {
+          skuId: cartInfo.skuId,
+          isChecked: cartInfo.isChecked ? 0 : 1,
+        });
+        this.getShopCartList();
+      } catch (error) {
+        console.log(error.message);
+      }
+    },
+    // 删除单个的
+    async deleteOne(cartinfo) {
+      try {
+        await this.$store.dispatch("deleteOneCart", cartinfo);
+        this.getShopCartList();
+      } catch (error) {
+        console.log(error.message);
+      }
+    },
+    // 删除所选所有购物车
+    async deleteAll() {
+      let skuIdList = [];
+      skuIdList = this.shopCartList.reduce((pre, item) => {
+        pre.push(
+          ...item.cartInfoList.reduce((pre1, item1) => {
+            if (item1.isChecked) {
+              pre1.push(item1.skuId);
+            }
+            return pre1;
+          }, [])
+        );
+        return pre;
+      }, []);
+
+      // console.log(skuIdList);
+
+      try {
+        await this.$store.dispatch("deleteAllCart", skuIdList);
+        this.getShopCartList();
+      } catch (error) {
+        console.log(error);
+      }
+    },
   },
   computed: {
     ...mapState({
@@ -103,8 +182,10 @@ export default {
       return this.shopCartList.reduce((pre, item) => {
         pre += item.cartInfoList.reduce((pre1, item1) => {
           if (item1.isChecked) {
-            return (pre1 += item1.skuNum);
+            // 注意这里 可不能直接return 因为这会导致直接结束了内层的循环
+            pre1 += item1.skuNum;
           }
+          return pre1;
         }, 0);
         return pre;
       }, 0);
@@ -112,9 +193,13 @@ export default {
     // 总价
     allMoney() {
       return this.shopCartList.reduce((pre, item) => {
-        return (pre += item.cartInfoList.reduce((pre1, item1) => {
-          return (pre1 += item1.skuNum * item1.cartPrice);
-        }, 0));
+        pre += item.cartInfoList.reduce((pre1, item1) => {
+          if (item1.isChecked) {
+            pre1 += item1.skuNum * item1.cartPrice;
+          }
+          return pre1;
+        }, 0);
+        return pre;
       }, 0);
     },
     // 全选
@@ -127,7 +212,27 @@ export default {
           ) && this.shopCartList.length > 0
         );
       },
-      set() {},
+      async set(val) {
+        let isChecked = val ? 1 : 0;
+        let skuIdList = [];
+        // 这里是将与全选按钮状态不同的id存储到数组中,因为后端需要用数组
+        this.shopCartList.forEach((item) => {
+          item.cartInfoList.forEach((item1) => {
+            if (item1.isChecked !== isChecked) {
+              skuIdList.push(item1.skuId);
+            }
+          });
+        });
+        try {
+          await this.$store.dispatch("updateAllIsCheck", {
+            isChecked: isChecked,
+            skuIdList: skuIdList,
+          });
+          this.getShopCartList();
+        } catch (error) {
+          console.log(error.message);
+        }
+      },
     },
   },
 };

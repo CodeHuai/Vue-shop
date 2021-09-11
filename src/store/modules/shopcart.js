@@ -1,4 +1,11 @@
-import { reqAddOrUpdateShopCart, reqShopCartList } from "@/api";
+import {
+  reqAddOrUpdateShopCart,
+  reqShopCartList,
+  reqUpdateOneIsCheck,
+  reqUpdateAllIsCheck,
+  reqDeleteOneCart,
+  reqDeleteAllCart,
+} from "@/api";
 
 const state = {
   shopCartList: [],
@@ -10,7 +17,7 @@ const mutations = {
 };
 
 const actions = {
-  // 添加购物车
+  // 添加购物车 以及修改数量的接口
   async addOrUpdateShopCart({ commit }, { skuId, skuNum }) {
     const result = await reqAddOrUpdateShopCart(skuId, skuNum);
     if (result.code === 200) {
@@ -25,6 +32,42 @@ const actions = {
     const result = await reqShopCartList();
     if (result.code === 200) {
       commit("RECEIVE_SHOPCARTLIST", result.data);
+    }
+  },
+  // 修改单个状态
+  async updateOneIsCheck({ commit }, { skuId, isChecked }) {
+    const result = await reqUpdateOneIsCheck(skuId, isChecked);
+    if (result.code === 200) {
+      return "ok";
+    } else {
+      return Promise.reject(new Error("failed"));
+    }
+  },
+  // 修改多个选中状态
+  async updateAllIsCheck({ commit }, { isChecked, skuIdList }) {
+    const result = await reqUpdateAllIsCheck(isChecked, skuIdList);
+    if (result.code === 200) {
+      return "ok";
+    } else {
+      return Promise.reject(new Error("failed"));
+    }
+  },
+  // 删除单个的
+  async deleteOneCart({ commit }, cartinfo) {
+    const result = await reqDeleteOneCart(cartinfo.skuId);
+    if (result.code === 200) {
+      return "ok";
+    } else {
+      return Promise.reject(new Error("failed"));
+    }
+  },
+  // 删除所选的所有购物车
+  async deleteAllCart({ commit }, skuIdList) {
+    const result = await reqDeleteAllCart(skuIdList);
+    if (result.code === 200) {
+      return "ok";
+    } else {
+      return Promise.reject(new Error("failed"));
     }
   },
 };

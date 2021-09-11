@@ -2,6 +2,7 @@ import { getUserTempId } from "@/utils/userabout";
 
 const state = {
   userTempId: getUserTempId(),
+  // userTempId: Date.now(),
 };
 
 const mutations = {};
