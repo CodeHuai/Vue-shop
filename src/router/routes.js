@@ -5,6 +5,12 @@ import Register from "@/pages/Register";
 import Detail from "@/pages/Detail";
 import AddCartSuccess from "@/pages/AddCartSuccess";
 import ShopCart from "@/pages/ShopCart";
+import Center from "@/pages/Center";
+import Pay from "@/pages/Pay";
+import Trade from "@/pages/Trade";
+import PaySuccess from "@/pages/PaySuccess";
+import MyOrder from "@/pages/Center/MyOrder";
+import GroupOrder from "@/pages/Center/GroupOrder";
 
 export default [
   {
@@ -45,5 +51,35 @@ export default [
   {
     path: "/shopcart",
     component: ShopCart,
+  },
+  {
+    path: "/center",
+    component: Center,
+    children: [
+      {
+        path: "myorder",
+        component: MyOrder,
+      },
+      {
+        path: "grouporder",
+        component: GroupOrder,
+      },
+      {
+        path: "",
+        redirect: "myorder",
+      },
+    ],
+  },
+  {
+    path: "/pay",
+    component: Pay,
+  },
+  {
+    path: "/trade",
+    component: Trade,
+  },
+  {
+    path: "/paysuccess",
+    component: PaySuccess,
   },
 ];
