@@ -6,7 +6,13 @@
       <div class="container">
         <div class="loginList">
           <p>尚品汇欢迎您！</p>
-          <p>
+          <p v-if="$store.state.user.userInfo.name">
+            <a href="javascript:;">{{ $store.state.user.userInfo.name }}</a>
+            <a href="javascript:;" class="register" @click="signOut"
+              >退出登录</a
+            >
+          </p>
+          <p v-else>
             <span>请</span>
             <router-link to="/login">登录</router-link>
             <!-- <a href="###">登录</a> -->
@@ -72,42 +78,27 @@ export default {
   },
   methods: {
     toSearch() {
-      // 三种
-      // 第一种字符串拼接
-      // 第二种es6模板字符串
-      // 第三种使用对象写法
-      // this.$router.push('/search/'+this.keyword + '?keyword1=' + this.keyword.toUpperCase())
-      // this.$router.push(`/search/${this.keyword}?keyword1=${this.keyword.toUpperCase()}`)
-
       let location = {
         name: "search",
         params: { keyword: this.keyword || undefined },
-        // query:{keyword1:this.keyword.toUpperCase()}
       };
 
-      // 点击搜索按钮的时候，跳转之前看看之前有没有带query参数，如果有吧query参数也会带上
-      // if(this.$route.query){
-      location.query = this.$route.query;
-      // }
+      // 点击搜索按钮的时候，跳转之前看看之前有没有带query参数，如果有就带上
+      if (this.$route.query) {
+        location.query = this.$route.query;
+      }
 
       this.$router.push(location);
-      // .catch(() => {})
-
-      // 面试问题3: 指定params参数时可不可以用path和params配置的组合?（对象写法）
-      // 不可以用path和params配置的组合,
-      // 只能用name和params配置的组合
-      // query配置可以与path或name进行组合使用
-
-      // this.$router.push({
-      //   // path:'/search',
-      //   name:'search',
-      //   params:{keyword:this.keyword||undefined},
-      // })
+    },
+    async signOut() {
+      try {
+        await this.$store.dispatch("userLogout");
+        this.$router.push("/");
+      } catch (error) {
+        console.log(error.message);
+      }
     },
   },
-  // 1、调试工具当中可以根据name搜索组件
-  // 2、全局注册组件的时候 Vue.component('Header',组件)或者Vue.component(组件.name,组件)
-  // 3、<keep-alive include="Header"></keep-alive>
 };
 </script>
 

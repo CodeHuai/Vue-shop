@@ -19,6 +19,12 @@ service.interceptors.request.use(
       config.headers.userTempId = userTempId;
     }
 
+    // 携带token 其实就是我们的正式的标识
+    let token = store.state.user.token;
+    if (token) {
+      config.headers.token = token;
+    }
+
     return config;
   }
   // 请求拦截器失败的回调一般不写
