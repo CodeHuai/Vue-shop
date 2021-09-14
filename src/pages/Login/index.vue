@@ -94,7 +94,8 @@ export default {
       if (phone & password) {
         try {
           await this.$store.dispatch("userLogin", { phone, password });
-          this.$router.push("/");
+          let redirect = this.$route.query.redirect || "/";
+          this.$router.push(redirect);
         } catch (error) {
           console.log(error.message);
         }

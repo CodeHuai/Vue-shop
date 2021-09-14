@@ -116,6 +116,7 @@ export default {
     async getPayInfo() {
       const result = await this.$API.reqPayInfo(this.orderNo);
       if (result.code === 200) {
+        // 这里返回的是支付的信息， 不仅仅包含了支付的状态码  实际上还包含了后端传来的微信二维码信息
         this.payInfo = result.data;
       }
     },

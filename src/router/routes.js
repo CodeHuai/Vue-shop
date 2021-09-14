@@ -47,6 +47,17 @@ export default [
   {
     path: "/addcartsuccess",
     component: AddCartSuccess,
+    beforeEnter: (to, from, next) => {
+      // 路由独享守卫，只和这个路由相关的导航守卫
+      let skuNum = to.query.skuNum;
+      let skuInfo = sessionStorage.getItem("skuInfo_key");
+      if (skuNum && skuInfo) {
+        next();
+      } else {
+        alert(111);
+        next(false);
+      }
+    },
   },
   {
     path: "/shopcart",
@@ -73,13 +84,38 @@ export default [
   {
     path: "/pay",
     component: Pay,
+    // 路由独享守卫
+    beforeEnter: (to, from, next) => {
+      //只有从购物车才能到交易
+      if (from.path === "/trade") {
+        next();
+      } else {
+        next(false);
+      }
+    },
   },
   {
     path: "/trade",
     component: Trade,
+    beforeEnter: (to, from, next) => {
+      //只有从购物车才能到交易
+      if (from.path === "/shopcart") {
+        next();
+      } else {
+        next(false);
+      }
+    },
   },
   {
     path: "/paysuccess",
     component: PaySuccess,
+    beforeEnter: (to, from, next) => {
+      //只有从购物车才能到交易
+      if (from.path === "/pay") {
+        next();
+      } else {
+        next(false);
+      }
+    },
   },
 ];

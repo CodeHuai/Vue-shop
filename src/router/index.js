@@ -68,7 +68,19 @@ router.beforeEach(async (to, from, next) => {
   } else {
     // 没有token
     // 目前先放行
-    next();
+    // next();
+    //代表token不存在，用户没登录过
+    // next() //目前我们先无条件放行，后面我们做了支付等功能完成后再回来限定它
+    let targetPath = to.path;
+    if (
+      targetPath.indexOf("/trade") === 0 ||
+      targetPath.startsWith("/center") ||
+      targetPath.startsWith("/pay")
+    ) {
+      next("/login?redirect=" + targetPath);
+    } else {
+      next();
+    }
   }
 });
 
